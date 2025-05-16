@@ -1,0 +1,4 @@
+# depslib dependency file v1.0
+1747420618 source:c:\os_lab\worst,best,first_fit.c\main.c
+	<stdio.h>
+
