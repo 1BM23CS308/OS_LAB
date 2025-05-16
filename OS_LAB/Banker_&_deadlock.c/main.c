@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define P 5
+#define R 3
+
+int main() {
+    int alloc[P][R] = { {0, 1, 0}, {2, 0, 0}, {3, 0, 2}, {2, 1, 1}, {0, 0, 2} };
+    int max[P][R]   = { {7, 5, 3}, {3, 2, 2}, {9, 0, 2}, {2, 2, 2}, {4, 3, 3} };
+    int avail[R]    = {3, 3, 2};
+    int need[P][R], finish[P] = {0}, safeSeq[P], work[R];
+    int i, j, k;
+
+    for (i = 0; i < P; i++)
+        for (j = 0; j < R; j++)
+            need[i][j] = max[i][j] - alloc[i][j];
+
+    for (i = 0; i < R; i++) work[i] = avail[i];
+
+    int count = 0;
+    while (count < P) {
+        bool found = false;
+        for (i = 0; i < P; i++) {
+            if (!finish[i]) {
+                for (j = 0; j < R; j++)
+                    if (need[i][j] > work[j]) break;
+
+                if (j == R) {
+                    for (k = 0; k < R; k++) work[k] += alloc[i][k];
+                    safeSeq[count++] = i;
+                    finish[i] = 1;
+                    found = true;
+                }
+            }
+        }
+        if (!found) break;
+    }
+
+    printf("\n--- Banker’s Algorithm ---\n");
+    if (count == P) {
+        printf("Safe Sequence: ");
+        for (i = 0; i < P; i++) printf("P%d ", safeSeq[i]);
+    } else printf("System is NOT in a safe state.\n");
+
+
+    int finish2[P] = {0};
+    for (i = 0; i < P; i++) {
+        bool can_finish = true;
+        for (j = 0; j < R; j++)
+            if (alloc[i][j] > avail[j]) can_finish = false;
+        if (can_finish) {
+            for (j = 0; j < R; j++) avail[j] += alloc[i][j];
+            finish2[i] = 1;
+        }
+    }
+
+    printf("\n\n--- Deadlock Detection ---\n");
+    bool deadlock = false;
+    for (i = 0; i < P; i++) {
+        if (!finish2[i]) {
+            printf("Process P%d is in deadlock.\n", i);
+            deadlock = true;
+        }
+    }
+    if (!deadlock) printf("No deadlock detected.\n");
+
+    return 0;
+}
